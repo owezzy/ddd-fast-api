@@ -178,6 +178,7 @@ Currently present:
 - the first plain-Python identity domain skeleton with invariant tests;
 - the first identity repository port and application lookup use case;
 - a sample identity HTTP endpoint with structured 400/404 responses;
+- a SQLAlchemy identity ORM model and repository adapter scaffold;
 - the first application-layer catalog use case and repository port;
 - a sample catalog HTTP endpoint wired through the application layer;
 - a sample catalog detail endpoint with structured 400/404 responses;
