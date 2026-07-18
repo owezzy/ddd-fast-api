@@ -177,6 +177,7 @@ Currently present:
 - the first plain-Python catalog domain skeleton with invariant tests;
 - the first plain-Python identity domain skeleton with invariant tests;
 - the first identity repository port and application lookup use case;
+- a sample identity HTTP endpoint with structured 400/404 responses;
 - the first application-layer catalog use case and repository port;
 - a sample catalog HTTP endpoint wired through the application layer;
 - a sample catalog detail endpoint with structured 400/404 responses;
@@ -218,6 +219,7 @@ The local server starts on `http://127.0.0.1:8000` and currently exposes:
 - `GET /health` — simple health check
 - `GET /catalog/items` — sample catalog items via the application layer
 - `GET /catalog/items/{sku}` — one sample catalog item by SKU
+- `GET /identity/users/{email}` — one sample user account by email
 
 Current runtime configuration lives in `src/ddd_fast_api/foundation/settings.py`
 and is populated from `.env` using the `DDD_FAST_API_` prefix.

@@ -3,20 +3,30 @@
 from fastapi import APIRouter, Depends
 
 from ddd_fast_api.application.catalog import GetCatalogItem, ListCatalogItems
+from ddd_fast_api.application.identity import GetUserAccountByEmail
 from ddd_fast_api.domain.catalog import SKU
+from ddd_fast_api.domain.identity import EmailAddress
 from ddd_fast_api.entrypoints.http.catalog_dependencies import (
     get_catalog_item_use_case,
     get_list_catalog_items_use_case,
 )
+from ddd_fast_api.entrypoints.http.identity_memory import build_sample_identity_repository
 from ddd_fast_api.entrypoints.http.schemas import (
     CatalogItemResponse,
     CatalogItemsResponse,
     HealthResponse,
     RootResponse,
+    UserAccountResponse,
 )
 from ddd_fast_api.foundation import ProjectError
 
 router = APIRouter()
+
+
+def get_user_account_by_email_use_case() -> GetUserAccountByEmail:
+    """Build the sample identity detail use case for the current scaffold."""
+
+    return GetUserAccountByEmail(repository=build_sample_identity_repository())
 
 
 @router.get("/", tags=["meta"], response_model=RootResponse)
@@ -74,3 +84,32 @@ async def get_catalog_item(
         )
 
     return CatalogItemResponse.from_domain(item)
+
+
+@router.get("/identity/users/{email}", tags=["identity"], response_model=UserAccountResponse)
+async def get_user_account(
+    email: str,
+    use_case: GetUserAccountByEmail = Depends(get_user_account_by_email_use_case),
+) -> UserAccountResponse:
+    """Return one sample user account by email through the application layer."""
+
+    try:
+        user_email = EmailAddress(email)
+    except ValueError as exc:
+        raise ProjectError(
+            code="invalid_user_email",
+            message=str(exc),
+            status_code=400,
+            details={"email": email},
+        ) from exc
+
+    account = await use_case.execute(user_email)
+    if account is None:
+        raise ProjectError(
+            code="user_account_not_found",
+            message="User account not found.",
+            status_code=404,
+            details={"email": user_email.value},
+        )
+
+    return UserAccountResponse.from_domain(account)
