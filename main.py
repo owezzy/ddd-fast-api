@@ -1,16 +1,29 @@
-# This is a sample Python script.
+"""Compatibility entrypoint for local development.
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+This file stays at the repository root for the early scaffold phase so
+contributors can start the minimal FastAPI app with a single command:
+
+    uv run python main.py
+"""
+
+import sys
+from pathlib import Path
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def _ensure_src_on_path() -> None:
+    src_path = Path(__file__).resolve().parent / "src"
+    if str(src_path) not in sys.path:
+        sys.path.insert(0, str(src_path))
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def main() -> None:
+    _ensure_src_on_path()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    from ddd_fast_api.bootstrap import run
+
+    run()
+
+
+
+if __name__ == "__main__":
+    main()
