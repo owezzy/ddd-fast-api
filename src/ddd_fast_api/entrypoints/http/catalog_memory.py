@@ -13,10 +13,10 @@ class InMemoryCatalogRepository(CatalogRepository):
 
     items: list[CatalogItem] = field(default_factory=list)
 
-    def list_items(self) -> list[CatalogItem]:
+    async def list_items(self) -> list[CatalogItem]:
         return self.items
 
-    def get_item_by_sku(self, sku: SKU) -> CatalogItem | None:
+    async def get_item_by_sku(self, sku: SKU) -> CatalogItem | None:
         for item in self.items:
             if item.sku == sku:
                 return item

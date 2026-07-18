@@ -47,17 +47,17 @@ def health() -> HealthResponse:
 
 
 @router.get("/catalog/items", tags=["catalog"], response_model=CatalogItemsResponse)
-def list_catalog_items(
+async def list_catalog_items(
     use_case: ListCatalogItems = Depends(get_list_catalog_items_use_case),
 ) -> CatalogItemsResponse:
     """Return the sample catalog through the application-layer use case."""
 
-    items = [CatalogItemResponse.from_domain(item) for item in use_case.execute()]
+    items = [CatalogItemResponse.from_domain(item) for item in await use_case.execute()]
     return CatalogItemsResponse(items=items)
 
 
 @router.get("/catalog/items/{sku}", tags=["catalog"], response_model=CatalogItemResponse)
-def get_catalog_item(
+async def get_catalog_item(
     sku: str,
     use_case: GetCatalogItem = Depends(get_catalog_item_use_case),
 ) -> CatalogItemResponse:
@@ -73,7 +73,7 @@ def get_catalog_item(
             details={"sku": sku},
         ) from exc
 
-    item = use_case.execute(catalog_sku)
+    item = await use_case.execute(catalog_sku)
     if item is None:
         raise ProjectError(
             code="catalog_item_not_found",

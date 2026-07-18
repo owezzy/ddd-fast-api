@@ -13,8 +13,8 @@ class ListCatalogItems:
 
     repository: CatalogRepository
 
-    def execute(self) -> list[CatalogItem]:
-        return self.repository.list_items()
+    async def execute(self) -> list[CatalogItem]:
+        return await self.repository.list_items()
 
 
 @dataclass(slots=True)
@@ -23,5 +23,5 @@ class GetCatalogItem:
 
     repository: CatalogRepository
 
-    def execute(self, sku: SKU) -> CatalogItem | None:
-        return self.repository.get_item_by_sku(sku)
+    async def execute(self, sku: SKU) -> CatalogItem | None:
+        return await self.repository.get_item_by_sku(sku)
