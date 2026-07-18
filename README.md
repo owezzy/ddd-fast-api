@@ -170,6 +170,7 @@ Currently present:
 - structured JSON logging wired into the bootstrap path;
 - SQLAlchemy async and Alembic persistence scaffolding;
 - a SQLAlchemy catalog ORM model and repository adapter scaffold;
+- an initial Alembic revision for the catalog table;
 - bootstrap-managed shared persistence resources for the SQLAlchemy path;
 - `src/ddd_fast_api` layer packages for entrypoints, application, domain,
   infrastructure, and foundation;
