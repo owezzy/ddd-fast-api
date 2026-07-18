@@ -193,7 +193,7 @@ Not yet present:
 - business-domain implementation beyond the scaffold metadata endpoints;
 - live HTTP wiring to the database-backed catalog adapter;
 - containers, Kubernetes manifests, or deployment workflows;
-- comprehensive unit, integration, contract, architecture, and smoke tests.
+- contract and smoke test layers.
 
 ## Getting started
 
