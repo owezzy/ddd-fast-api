@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     app_debug: bool = False
     app_host: str = "127.0.0.1"
     app_port: int = 8000
+    app_log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
 
 @lru_cache(maxsize=1)
