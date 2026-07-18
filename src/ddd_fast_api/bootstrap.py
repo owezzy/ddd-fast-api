@@ -1,5 +1,8 @@
 """Application bootstrap for the initial foundation slice."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -11,8 +14,37 @@ from ddd_fast_api.foundation import (
     get_settings,
     register_exception_handlers,
 )
+from ddd_fast_api.infrastructure.persistence import (
+    create_engine,
+    create_session_factory_from_engine,
+)
 
 logger = get_logger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    """Own shared process resources for the current application instance."""
+
+    settings = application.state.settings
+    engine = create_engine(settings)
+    session_factory = create_session_factory_from_engine(engine)
+
+    application.state.engine = engine
+    application.state.session_factory = session_factory
+
+    logger.info(
+        "persistence resources initialized",
+        extra={"event": "persistence_resources_initialized"},
+    )
+
+    yield
+
+    await engine.dispose()
+    logger.info(
+        "persistence resources disposed",
+        extra={"event": "persistence_resources_disposed"},
+    )
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -29,7 +61,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "Initial executable foundation slice for an Ardan-inspired FastAPI service template."
         ),
         debug=resolved_settings.app_debug,
+        lifespan=lifespan,
     )
+    application.state.settings = resolved_settings
     register_exception_handlers(application)
     application.include_router(router)
     logger.info(

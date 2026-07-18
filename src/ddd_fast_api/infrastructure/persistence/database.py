@@ -27,7 +27,15 @@ def create_engine(settings: Settings) -> AsyncEngine:
 def create_session_factory(settings: Settings) -> async_sessionmaker[AsyncSession]:
     """Build the async session factory for the project."""
 
-    return async_sessionmaker(bind=create_engine(settings), expire_on_commit=False)
+    return create_session_factory_from_engine(create_engine(settings))
+
+
+def create_session_factory_from_engine(
+    engine: AsyncEngine,
+) -> async_sessionmaker[AsyncSession]:
+    """Build the async session factory from an existing engine."""
+
+    return async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
 @lru_cache(maxsize=1)

@@ -4,6 +4,7 @@ from ddd_fast_api.infrastructure.persistence.base import Base, metadata
 from ddd_fast_api.infrastructure.persistence.database import (
     create_engine,
     create_session_factory,
+    create_session_factory_from_engine,
     get_engine,
     get_session_factory,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "SQLAlchemyCatalogRepository",
     "create_engine",
     "create_session_factory",
+    "create_session_factory_from_engine",
     "get_engine",
     "get_session_factory",
     "metadata",

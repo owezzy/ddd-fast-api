@@ -28,3 +28,11 @@ async def test_health_reports_ok() -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+@pytest.mark.anyio
+async def test_lifespan_initializes_persistence_resources() -> None:
+    async with app.router.lifespan_context(app):
+        assert app.state.settings.app_name == "ddd-fast-api"
+        assert app.state.engine is not None
+        assert app.state.session_factory is not None
