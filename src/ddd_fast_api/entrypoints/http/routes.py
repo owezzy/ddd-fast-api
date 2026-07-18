@@ -4,7 +4,10 @@ from fastapi import APIRouter, Depends
 
 from ddd_fast_api.application.catalog import GetCatalogItem, ListCatalogItems
 from ddd_fast_api.domain.catalog import SKU
-from ddd_fast_api.entrypoints.http.catalog_memory import build_sample_catalog_repository
+from ddd_fast_api.entrypoints.http.catalog_dependencies import (
+    get_catalog_item_use_case,
+    get_list_catalog_items_use_case,
+)
 from ddd_fast_api.entrypoints.http.schemas import (
     CatalogItemResponse,
     CatalogItemsResponse,
@@ -14,18 +17,6 @@ from ddd_fast_api.entrypoints.http.schemas import (
 from ddd_fast_api.foundation import ProjectError
 
 router = APIRouter()
-
-
-def get_list_catalog_items_use_case() -> ListCatalogItems:
-    """Build the sample catalog list use case for the current scaffold."""
-
-    return ListCatalogItems(repository=build_sample_catalog_repository())
-
-
-def get_catalog_item_use_case() -> GetCatalogItem:
-    """Build the sample catalog detail use case for the current scaffold."""
-
-    return GetCatalogItem(repository=build_sample_catalog_repository())
 
 
 @router.get("/", tags=["meta"], response_model=RootResponse)

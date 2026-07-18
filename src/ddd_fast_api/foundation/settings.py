@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     app_port: int = 8000
     app_log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ddd_fast_api"
+    catalog_repository_backend: Literal["memory", "sqlalchemy"] = "memory"
 
 
 @lru_cache(maxsize=1)

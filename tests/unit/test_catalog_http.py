@@ -1,9 +1,15 @@
 """Tests for the sample catalog HTTP endpoint."""
 
+from pathlib import Path
+
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from ddd_fast_api.bootstrap import app
+from ddd_fast_api.foundation import Settings, get_settings
+from ddd_fast_api.infrastructure.persistence import Base, create_engine
+from ddd_fast_api.infrastructure.persistence.models import CatalogItemModel
 
 
 @pytest.mark.anyio
@@ -83,4 +89,61 @@ async def test_catalog_item_detail_route_rejects_invalid_sku() -> None:
             "message": "SKU cannot be empty.",
             "details": {"sku": " "},
         }
+    }
+
+
+@pytest.mark.anyio
+async def test_catalog_routes_can_select_sqlalchemy_adapter(tmp_path: Path) -> None:
+    database_path = tmp_path / "catalog.db"
+    settings = Settings(
+        _env_file=None,
+        catalog_repository_backend="sqlalchemy",
+        database_url=f"sqlite+aiosqlite:///{database_path}",
+    )
+    engine = create_engine(settings)
+
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+    async with session_factory() as session:
+        session.add(
+            CatalogItemModel(
+                id="item-db-1",
+                sku="SKU-DB1",
+                name="Database item",
+                status="active",
+            ),
+        )
+        await session.commit()
+
+    app.dependency_overrides[get_settings] = lambda: settings
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://testserver",
+    ) as client:
+        list_response = await client.get("/catalog/items")
+        detail_response = await client.get("/catalog/items/SKU-DB1")
+
+    app.dependency_overrides.clear()
+    await engine.dispose()
+
+    assert list_response.status_code == 200
+    assert list_response.json() == {
+        "items": [
+            {
+                "id": "item-db-1",
+                "sku": "SKU-DB1",
+                "name": "Database item",
+                "status": "active",
+            },
+        ]
+    }
+    assert detail_response.status_code == 200
+    assert detail_response.json() == {
+        "id": "item-db-1",
+        "sku": "SKU-DB1",
+        "name": "Database item",
+        "status": "active",
     }
