@@ -7,9 +7,13 @@ from ddd_fast_api.infrastructure.persistence.database import (
     get_engine,
     get_session_factory,
 )
+from ddd_fast_api.infrastructure.persistence.models import CatalogItemModel
+from ddd_fast_api.infrastructure.persistence.repositories import SQLAlchemyCatalogRepository
 
 __all__ = [
     "Base",
+    "CatalogItemModel",
+    "SQLAlchemyCatalogRepository",
     "create_engine",
     "create_session_factory",
     "get_engine",
