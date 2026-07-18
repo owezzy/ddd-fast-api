@@ -176,6 +176,7 @@ Currently present:
 - the first application-layer catalog use case and repository port;
 - a sample catalog HTTP endpoint wired through the application layer;
 - a sample catalog detail endpoint with structured 400/404 responses;
+- a settings-driven seam for choosing the catalog adapter (defaulting to memory);
 - an initial architecture test that guards domain-layer imports;
 - a minimal FastAPI app factory with `/` and `/health` routes;
 - an initial unit test covering the scaffold entrypoints;
@@ -216,6 +217,10 @@ The local server starts on `http://127.0.0.1:8000` and currently exposes:
 
 Current runtime configuration lives in `src/ddd_fast_api/foundation/settings.py`
 and is populated from `.env` using the `DDD_FAST_API_` prefix.
+
+The catalog endpoints currently default to the in-memory adapter. The SQLAlchemy
+adapter can be selected by setting `DDD_FAST_API_CATALOG_REPOSITORY_BACKEND`
+to `sqlalchemy`.
 
 If you prefer stable task-style commands over raw uv invocations, the current
 scaffold also provides:
