@@ -170,6 +170,7 @@ Currently present:
 - structured JSON logging wired into the bootstrap path;
 - SQLAlchemy async and Alembic persistence scaffolding;
 - a SQLAlchemy catalog ORM model and repository adapter scaffold;
+- bootstrap-managed shared persistence resources for the SQLAlchemy path;
 - `src/ddd_fast_api` layer packages for entrypoints, application, domain,
   infrastructure, and foundation;
 - the first plain-Python catalog domain skeleton with invariant tests;
@@ -220,7 +221,9 @@ and is populated from `.env` using the `DDD_FAST_API_` prefix.
 
 The catalog endpoints currently default to the in-memory adapter. The SQLAlchemy
 adapter can be selected by setting `DDD_FAST_API_CATALOG_REPOSITORY_BACKEND`
-to `sqlalchemy`.
+to `sqlalchemy`. When selected, the app now reuses bootstrap-managed persistence
+resources for the default configuration and falls back to an isolated engine in
+override-driven tests.
 
 If you prefer stable task-style commands over raw uv invocations, the current
 scaffold also provides:
