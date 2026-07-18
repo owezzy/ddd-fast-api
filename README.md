@@ -168,6 +168,7 @@ Currently present:
 - typed runtime settings with an `.env.example` bootstrap;
 - a foundation error model and FastAPI exception handler registration;
 - structured JSON logging wired into the bootstrap path;
+- SQLAlchemy async and Alembic persistence scaffolding;
 - `src/ddd_fast_api` layer packages for entrypoints, application, domain,
   infrastructure, and foundation;
 - the first plain-Python catalog domain skeleton with invariant tests;
@@ -186,7 +187,8 @@ Currently present:
 Not yet present:
 
 - business-domain implementation beyond the scaffold metadata endpoints;
-- migrations, containers, Kubernetes manifests, or deployment workflows;
+- concrete ORM models or database-backed catalog adapters;
+- containers, Kubernetes manifests, or deployment workflows;
 - comprehensive unit, integration, contract, architecture, and smoke tests.
 
 ## Getting started
