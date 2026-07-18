@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     app_host: str = "127.0.0.1"
     app_port: int = 8000
     app_log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ddd_fast_api"
 
 
 @lru_cache(maxsize=1)
