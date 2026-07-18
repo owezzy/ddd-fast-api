@@ -167,11 +167,17 @@ Currently present:
 - Python 3.12+ support decision;
 - typed runtime settings with an `.env.example` bootstrap;
 - a foundation error model and FastAPI exception handler registration;
+- structured JSON logging wired into the bootstrap path;
 - `src/ddd_fast_api` layer packages for entrypoints, application, domain,
   infrastructure, and foundation;
+- the first plain-Python catalog domain skeleton with invariant tests;
+- the first application-layer catalog use case and repository port;
+- a sample catalog HTTP endpoint wired through the application layer;
 - an initial architecture test that guards domain-layer imports;
 - a minimal FastAPI app factory with `/` and `/health` routes;
 - an initial unit test covering the scaffold entrypoints;
+- a GitHub Actions quality workflow definition for tests, Ruff, and mypy;
+- explicit Pydantic boundary schemas for the scaffold metadata endpoints;
 - repository ignore rules;
 - this project overview;
 - MIT licensing.
@@ -179,8 +185,7 @@ Currently present:
 Not yet present:
 
 - business-domain implementation beyond the scaffold metadata endpoints;
-- configuration via `pydantic-settings`;
-- migrations, containers, Kubernetes manifests, or CI workflows;
+- migrations, containers, Kubernetes manifests, or deployment workflows;
 - comprehensive unit, integration, contract, architecture, and smoke tests.
 
 ## Getting started
@@ -202,6 +207,7 @@ The local server starts on `http://127.0.0.1:8000` and currently exposes:
 
 - `GET /` — scaffold metadata
 - `GET /health` — simple health check
+- `GET /catalog/items` — sample catalog items via the application layer
 
 Current runtime configuration lives in `src/ddd_fast_api/foundation/settings.py`
 and is populated from `.env` using the `DDD_FAST_API_` prefix.
