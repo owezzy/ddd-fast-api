@@ -10,7 +10,9 @@ from ddd_fast_api.entrypoints.http.catalog_dependencies import (
     get_catalog_item_use_case,
     get_list_catalog_items_use_case,
 )
-from ddd_fast_api.entrypoints.http.identity_memory import build_sample_identity_repository
+from ddd_fast_api.entrypoints.http.identity_dependencies import (
+    get_user_account_by_email_use_case,
+)
 from ddd_fast_api.entrypoints.http.schemas import (
     CatalogItemResponse,
     CatalogItemsResponse,
@@ -21,12 +23,6 @@ from ddd_fast_api.entrypoints.http.schemas import (
 from ddd_fast_api.foundation import ProjectError
 
 router = APIRouter()
-
-
-def get_user_account_by_email_use_case() -> GetUserAccountByEmail:
-    """Build the sample identity detail use case for the current scaffold."""
-
-    return GetUserAccountByEmail(repository=build_sample_identity_repository())
 
 
 @router.get("/", tags=["meta"], response_model=RootResponse)
