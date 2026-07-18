@@ -175,6 +175,7 @@ Currently present:
 - `src/ddd_fast_api` layer packages for entrypoints, application, domain,
   infrastructure, and foundation;
 - the first plain-Python catalog domain skeleton with invariant tests;
+- the first plain-Python identity domain skeleton with invariant tests;
 - the first application-layer catalog use case and repository port;
 - a sample catalog HTTP endpoint wired through the application layer;
 - a sample catalog detail endpoint with structured 400/404 responses;
