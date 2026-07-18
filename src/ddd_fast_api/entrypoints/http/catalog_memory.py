@@ -16,6 +16,12 @@ class InMemoryCatalogRepository(CatalogRepository):
     def list_items(self) -> list[CatalogItem]:
         return self.items
 
+    def get_item_by_sku(self, sku: SKU) -> CatalogItem | None:
+        for item in self.items:
+            if item.sku == sku:
+                return item
+        return None
+
 
 def build_sample_catalog_repository() -> InMemoryCatalogRepository:
     """Create the temporary sample catalog dataset for the scaffold."""

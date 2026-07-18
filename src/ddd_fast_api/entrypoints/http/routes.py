@@ -2,7 +2,8 @@
 
 from fastapi import APIRouter, Depends
 
-from ddd_fast_api.application.catalog import ListCatalogItems
+from ddd_fast_api.application.catalog import GetCatalogItem, ListCatalogItems
+from ddd_fast_api.domain.catalog import SKU
 from ddd_fast_api.entrypoints.http.catalog_memory import build_sample_catalog_repository
 from ddd_fast_api.entrypoints.http.schemas import (
     CatalogItemResponse,
@@ -10,6 +11,7 @@ from ddd_fast_api.entrypoints.http.schemas import (
     HealthResponse,
     RootResponse,
 )
+from ddd_fast_api.foundation import ProjectError
 
 router = APIRouter()
 
@@ -18,6 +20,12 @@ def get_list_catalog_items_use_case() -> ListCatalogItems:
     """Build the sample catalog list use case for the current scaffold."""
 
     return ListCatalogItems(repository=build_sample_catalog_repository())
+
+
+def get_catalog_item_use_case() -> GetCatalogItem:
+    """Build the sample catalog detail use case for the current scaffold."""
+
+    return GetCatalogItem(repository=build_sample_catalog_repository())
 
 
 @router.get("/", tags=["meta"], response_model=RootResponse)
@@ -46,3 +54,32 @@ def list_catalog_items(
 
     items = [CatalogItemResponse.from_domain(item) for item in use_case.execute()]
     return CatalogItemsResponse(items=items)
+
+
+@router.get("/catalog/items/{sku}", tags=["catalog"], response_model=CatalogItemResponse)
+def get_catalog_item(
+    sku: str,
+    use_case: GetCatalogItem = Depends(get_catalog_item_use_case),
+) -> CatalogItemResponse:
+    """Return one sample catalog item by SKU through the application layer."""
+
+    try:
+        catalog_sku = SKU(sku)
+    except ValueError as exc:
+        raise ProjectError(
+            code="invalid_catalog_sku",
+            message=str(exc),
+            status_code=400,
+            details={"sku": sku},
+        ) from exc
+
+    item = use_case.execute(catalog_sku)
+    if item is None:
+        raise ProjectError(
+            code="catalog_item_not_found",
+            message="Catalog item not found.",
+            status_code=404,
+            details={"sku": catalog_sku.value},
+        )
+
+    return CatalogItemResponse.from_domain(item)
