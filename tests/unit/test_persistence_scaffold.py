@@ -38,3 +38,13 @@ def test_alembic_entrypoints_exist() -> None:
     assert (root / "alembic.ini").exists()
     assert (root / "alembic" / "env.py").exists()
     assert (root / "alembic" / "script.py.mako").exists()
+
+
+def test_initial_catalog_migration_exists() -> None:
+    root = Path(__file__).resolve().parents[2]
+    migration_file = root / "alembic" / "versions" / "20260718_183900_create_catalog_items.py"
+
+    assert migration_file.exists()
+    contents = migration_file.read_text()
+    assert "catalog_items" in contents
+    assert "ix_catalog_items_sku" in contents
