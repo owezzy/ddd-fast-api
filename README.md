@@ -183,10 +183,15 @@ Currently present:
 - a sample catalog HTTP endpoint wired through the application layer;
 - a sample catalog detail endpoint with structured 400/404 responses;
 - a settings-driven seam for choosing the catalog adapter (defaulting to memory);
+- a settings-driven seam for choosing the identity adapter (defaulting to memory);
 - an initial architecture test that guards domain-layer imports;
+- expanded architecture tests that guard domain, application, and foundation
+  layer boundaries;
 - a minimal FastAPI app factory with `/` and `/health` routes;
 - an initial unit test covering the scaffold entrypoints;
 - a GitHub Actions quality workflow definition for tests, Ruff, and mypy;
+- optional Husky git hooks for commit-time formatting, linting, and conventional
+  commit validation;
 - explicit Pydantic boundary schemas for the scaffold metadata endpoints;
 - repository ignore rules;
 - this project overview;
@@ -242,6 +247,19 @@ make lint
 make type-check
 ```
 
+Optional contributor git tooling is also available:
+
+```bash
+make hooks
+make commit
+```
+
+- `make hooks` installs the local Husky git hooks from `package.json`.
+- The `pre-commit` hook runs `make format` and `make lint` before each commit.
+- The `commit-msg` hook validates messages with Commitizen's conventional
+  commit rules.
+- `make commit` opens an interactive Commitizen prompt via `uv run cz commit`.
+
 Read these sections next:
 
 1. [Design principles](#design-principles) for the rules every contribution
@@ -258,6 +276,11 @@ Development requirements for the current scaffold are:
 - Git
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/)
+
+Optional local commit-hook workflow requirements:
+
+- Node.js
+- npm
 
 Python 3.12, 3.13, and 3.14 will be tested once CI is introduced. Docker,
 Docker Compose, Kind, kubectl, and Kustomize become requirements in the

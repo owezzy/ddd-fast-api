@@ -1,4 +1,4 @@
-.PHONY: help sync run test lint format type-check clean
+.PHONY: help sync run test lint format type-check hooks commit clean
 
 help:
 	@printf "Available targets:\n"
@@ -8,6 +8,8 @@ help:
 	@printf "  lint        Run Ruff checks\n"
 	@printf "  format      Apply Ruff fixes and formatting\n"
 	@printf "  type-check  Run mypy against src\n"
+	@printf "  hooks       Install local Husky git hooks\n"
+	@printf "  commit      Open an interactive Commitizen conventional commit prompt\n"
 	@printf "  clean       Remove local caches and test artifacts\n"
 
 sync:
@@ -28,6 +30,12 @@ format:
 
 type-check:
 	uv run mypy src
+
+hooks:
+	npm install
+
+commit:
+	uv run cz commit
 
 clean:
 	rm -rf .pytest_cache .mypy_cache .ruff_cache htmlcov build dist

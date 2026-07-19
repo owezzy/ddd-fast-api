@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+set -e
+
+uv run cz check --allow-abort --commit-msg-file "$1"

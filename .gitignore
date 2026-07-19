@@ -29,6 +29,10 @@ htmlcov/
 .vscode/
 .DS_Store
 
+# Node tooling for local git hooks
+node_modules/
+.husky/_/
+
 # Beads / Dolt files (added by bd init)
 .dolt/
 *.db

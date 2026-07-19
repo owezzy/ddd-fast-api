@@ -1,0 +1,11 @@
+{
+  "name": "ddd-fast-api",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "commit": "uv run cz commit"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

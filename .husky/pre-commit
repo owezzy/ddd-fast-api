@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+set -e
+
+make format
+git add --update
+make lint
