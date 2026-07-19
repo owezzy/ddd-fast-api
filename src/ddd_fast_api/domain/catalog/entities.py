@@ -3,16 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
 
-from ddd_fast_api.domain.catalog.value_objects import SKU
-
-
-class CatalogItemStatus(StrEnum):
-    """Availability status for a catalog item."""
-
-    ACTIVE = "active"
-    INACTIVE = "inactive"
+from ddd_fast_api.domain.catalog.value_objects import SKU, CatalogItemStatus
 
 
 @dataclass(slots=True)

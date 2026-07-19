@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from ddd_fast_api.application.catalog import GetCatalogItem, ListCatalogItems
-from ddd_fast_api.domain.catalog import CatalogRepository
-from ddd_fast_api.entrypoints.http.catalog_memory import build_sample_catalog_repository
+from ddd_fast_api.domain.catalog import CatalogUnitOfWork, CatalogUnitOfWorkFactory
+from ddd_fast_api.entrypoints.http.catalog_memory import build_sample_catalog_unit_of_work
 from ddd_fast_api.foundation import Settings, get_settings
 from ddd_fast_api.infrastructure.persistence import (
-    SQLAlchemyCatalogRepository,
+    SQLAlchemyCatalogUnitOfWork,
     create_engine,
     create_session_factory_from_engine,
 )
@@ -41,39 +40,47 @@ def _resolve_persistence_resources(
     return engine, session_factory, True
 
 
-async def get_catalog_repository(
+def get_catalog_unit_of_work_factory(
     request: Request,
     settings: Annotated[Settings, Depends(get_settings)],
-) -> AsyncIterator[CatalogRepository]:
-    """Select the catalog repository implementation for the current request."""
+) -> CatalogUnitOfWorkFactory:
+    """Select the catalog unit-of-work implementation for the current request."""
 
     if settings.catalog_repository_backend == "memory":
-        yield build_sample_catalog_repository()
-        return
+        return build_sample_catalog_unit_of_work
 
     engine, session_factory, should_dispose_engine = _resolve_persistence_resources(
         request,
         settings,
     )
 
-    async with session_factory() as session:
-        yield SQLAlchemyCatalogRepository(session)
+    def factory() -> CatalogUnitOfWork:
+        return SQLAlchemyCatalogUnitOfWork(
+            session_factory=session_factory,
+            engine=engine,
+            should_dispose_engine=should_dispose_engine,
+        )
 
-    if should_dispose_engine:
-        await engine.dispose()
+    return factory
 
 
 def get_list_catalog_items_use_case(
-    repository: Annotated[CatalogRepository, Depends(get_catalog_repository)],
+    unit_of_work_factory: Annotated[
+        CatalogUnitOfWorkFactory,
+        Depends(get_catalog_unit_of_work_factory),
+    ],
 ) -> ListCatalogItems:
     """Build the sample catalog list use case for the current scaffold."""
 
-    return ListCatalogItems(repository=repository)
+    return ListCatalogItems(unit_of_work_factory=unit_of_work_factory)
 
 
 def get_catalog_item_use_case(
-    repository: Annotated[CatalogRepository, Depends(get_catalog_repository)],
+    unit_of_work_factory: Annotated[
+        CatalogUnitOfWorkFactory,
+        Depends(get_catalog_unit_of_work_factory),
+    ],
 ) -> GetCatalogItem:
     """Build the sample catalog detail use case for the current scaffold."""
 
-    return GetCatalogItem(repository=repository)
+    return GetCatalogItem(unit_of_work_factory=unit_of_work_factory)

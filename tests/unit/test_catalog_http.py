@@ -35,7 +35,19 @@ async def test_catalog_items_route_uses_application_layer_shape() -> None:
                 "name": "Second item",
                 "status": "active",
             },
-        ]
+            {
+                "id": "item-3",
+                "sku": "SKU-003",
+                "name": "Archived item",
+                "status": "inactive",
+            },
+        ],
+        "page": 1,
+        "page_size": 20,
+        "total_items": 3,
+        "total_pages": 1,
+        "has_next": False,
+        "has_previous": False,
     }
 
 
@@ -95,10 +107,11 @@ async def test_catalog_item_detail_route_rejects_invalid_sku() -> None:
 @pytest.mark.anyio
 async def test_catalog_routes_can_select_sqlalchemy_adapter(tmp_path: Path) -> None:
     database_path = tmp_path / "catalog.db"
-    settings = Settings(
-        _env_file=None,
-        catalog_repository_backend="sqlalchemy",
-        database_url=f"sqlite+aiosqlite:///{database_path}",
+    settings = Settings.model_validate(
+        {
+            "catalog_repository_backend": "sqlalchemy",
+            "database_url": f"sqlite+aiosqlite:///{database_path}",
+        },
     )
     engine = create_engine(settings)
 
@@ -138,7 +151,13 @@ async def test_catalog_routes_can_select_sqlalchemy_adapter(tmp_path: Path) -> N
                 "name": "Database item",
                 "status": "active",
             },
-        ]
+        ],
+        "page": 1,
+        "page_size": 20,
+        "total_items": 1,
+        "total_pages": 1,
+        "has_next": False,
+        "has_previous": False,
     }
     assert detail_response.status_code == 200
     assert detail_response.json() == {
@@ -146,4 +165,41 @@ async def test_catalog_routes_can_select_sqlalchemy_adapter(tmp_path: Path) -> N
         "sku": "SKU-DB1",
         "name": "Database item",
         "status": "active",
+    }
+
+
+@pytest.mark.anyio
+async def test_catalog_items_route_supports_filter_order_and_pagination() -> None:
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://testserver",
+    ) as client:
+        response = await client.get(
+            "/catalog/items",
+            params={
+                "status": "active",
+                "search": "item",
+                "sort_by": "name",
+                "sort_direction": "desc",
+                "page": 1,
+                "page_size": 1,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "items": [
+            {
+                "id": "item-1",
+                "sku": "SKU-001",
+                "name": "Starter item",
+                "status": "active",
+            },
+        ],
+        "page": 1,
+        "page_size": 1,
+        "total_items": 2,
+        "total_pages": 2,
+        "has_next": True,
+        "has_previous": False,
     }

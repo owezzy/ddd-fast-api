@@ -13,10 +13,12 @@ from ddd_fast_api.infrastructure.persistence.repositories import (
     SQLAlchemyCatalogRepository,
     SQLAlchemyIdentityRepository,
 )
+from ddd_fast_api.infrastructure.persistence.unit_of_work import SQLAlchemyCatalogUnitOfWork
 
 __all__ = [
     "Base",
     "CatalogItemModel",
+    "SQLAlchemyCatalogUnitOfWork",
     "SQLAlchemyCatalogRepository",
     "SQLAlchemyIdentityRepository",
     "UserAccountModel",

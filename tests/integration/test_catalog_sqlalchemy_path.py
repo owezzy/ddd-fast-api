@@ -15,11 +15,12 @@ from ddd_fast_api.infrastructure.persistence.models import CatalogItemModel
 @pytest.mark.anyio
 async def test_catalog_items_route_works_with_sqlalchemy_backend(tmp_path: Path) -> None:
     database_path = tmp_path / "integration-catalog.db"
-    settings = Settings(
-        _env_file=None,
-        catalog_repository_backend="sqlalchemy",
-        database_url=f"sqlite+aiosqlite:///{database_path}",
-        app_env="test",
+    settings = Settings.model_validate(
+        {
+            "catalog_repository_backend": "sqlalchemy",
+            "database_url": f"sqlite+aiosqlite:///{database_path}",
+            "app_env": "test",
+        },
     )
     app = create_app(settings)
     app.dependency_overrides[get_settings] = lambda: settings
@@ -58,5 +59,11 @@ async def test_catalog_items_route_works_with_sqlalchemy_backend(tmp_path: Path)
                 "name": "Integration item",
                 "status": "active",
             },
-        ]
+        ],
+        "page": 1,
+        "page_size": 20,
+        "total_items": 1,
+        "total_pages": 1,
+        "has_next": False,
+        "has_previous": False,
     }

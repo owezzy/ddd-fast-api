@@ -32,6 +32,7 @@ top of FastAPI.
 - [Repository status](#repository-status)
 - [Getting started](#getting-started)
 - [Delivery roadmap](#delivery-roadmap)
+- [Domain scaffolding contract](docs/scaffolding.md)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -170,6 +171,8 @@ Currently present:
 - structured JSON logging wired into the bootstrap path;
 - SQLAlchemy async and Alembic persistence scaffolding;
 - a SQLAlchemy catalog ORM model and repository adapter scaffold;
+- a SQLAlchemy-backed catalog unit-of-work seam for application-owned catalog
+  transaction boundaries;
 - an initial Alembic revision for the catalog table;
 - bootstrap-managed shared persistence resources for the SQLAlchemy path;
 - `src/ddd_fast_api` layer packages for entrypoints, application, domain,
@@ -181,6 +184,8 @@ Currently present:
 - a SQLAlchemy identity ORM model and repository adapter scaffold;
 - the first application-layer catalog use case and repository port;
 - a sample catalog HTTP endpoint wired through the application layer;
+- catalog list filtering, ordering, and pagination through typed domain and HTTP
+  query models;
 - a sample catalog detail endpoint with structured 400/404 responses;
 - a settings-driven seam for choosing the catalog adapter (defaulting to memory);
 - a settings-driven seam for choosing the identity adapter (defaulting to memory);
@@ -200,7 +205,6 @@ Currently present:
 Not yet present:
 
 - business-domain implementation beyond the scaffold metadata endpoints;
-- live HTTP wiring to the database-backed catalog adapter;
 - containers, Kubernetes manifests, or deployment workflows;
 - contract and smoke test layers.
 
@@ -224,6 +228,7 @@ The local server starts on `http://127.0.0.1:8000` and currently exposes:
 - `GET /` — scaffold metadata
 - `GET /health` — simple health check
 - `GET /catalog/items` — sample catalog items via the application layer
+  with optional filtering, ordering, and pagination query parameters
 - `GET /catalog/items/{sku}` — one sample catalog item by SKU
 - `GET /identity/users/{email}` — one sample user account by email
 
@@ -234,7 +239,9 @@ The catalog endpoints currently default to the in-memory adapter. The SQLAlchemy
 adapter can be selected by setting `DDD_FAST_API_CATALOG_REPOSITORY_BACKEND`
 to `sqlalchemy`. When selected, the app now reuses bootstrap-managed persistence
 resources for the default configuration and falls back to an isolated engine in
-override-driven tests.
+override-driven tests. Catalog application use cases now execute through an
+explicit catalog unit-of-work seam instead of depending directly on raw
+repository instances.
 
 If you prefer stable task-style commands over raw uv invocations, the current
 scaffold also provides:
@@ -295,7 +302,7 @@ project transitions fully into the `src/ddd_fast_api` layout.
 - [x] Define architecture, feature parity, and dependency rules.
 - [x] Initialize and publish the repository.
 - [x] Establish Python 3.12+ and MIT license decisions.
-- [ ] **Foundation:** package layout, configuration, lifecycle, errors, logging,
+- [x] **Foundation:** package layout, configuration, lifecycle, errors, logging,
       dependency rules, quality tools, and architecture tests.
 - [ ] **Reference slice:** inventory/catalog contract, domain behavior,
       PostgreSQL adapter, migrations, and tests.
@@ -310,17 +317,16 @@ project transitions fully into the `src/ddd_fast_api` layout.
 
 ## Contributing
 
-The contribution workflow will be documented fully during the foundation
-phase. Until then:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the current contributor workflow,
+local quality gates, and commit conventions.
 
-1. Open an issue describing the problem or proposed capability.
-2. Keep changes focused and preserve the inward dependency rule.
-3. Include tests and documentation with implemented behavior.
-4. Submit changes through a pull request; do not merge feature work directly
-   into `main`.
+The intended domain generator contract is documented in
+[`docs/scaffolding.md`](docs/scaffolding.md) so future implementation work has a
+ stable architectural target.
 
 Architecture decisions that are expensive to reverse, surprising without
-context, and based on a real trade-off should be recorded as ADRs.
+context, and based on a real trade-off should be recorded under
+[`docs/adr/`](docs/adr/README.md).
 
 ## License
 

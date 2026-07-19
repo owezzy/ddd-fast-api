@@ -1,6 +1,8 @@
 """Minimal HTTP routes for the first executable scaffold."""
 
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query
 
 from ddd_fast_api.application.catalog import GetCatalogItem, ListCatalogItems
 from ddd_fast_api.application.identity import GetUserAccountByEmail
@@ -15,6 +17,7 @@ from ddd_fast_api.entrypoints.http.identity_dependencies import (
 )
 from ddd_fast_api.entrypoints.http.schemas import (
     CatalogItemResponse,
+    CatalogItemsQuery,
     CatalogItemsResponse,
     HealthResponse,
     RootResponse,
@@ -46,11 +49,12 @@ def health() -> HealthResponse:
 @router.get("/catalog/items", tags=["catalog"], response_model=CatalogItemsResponse)
 async def list_catalog_items(
     use_case: ListCatalogItems = Depends(get_list_catalog_items_use_case),
+    query: Annotated[CatalogItemsQuery, Query()] = CatalogItemsQuery(),
 ) -> CatalogItemsResponse:
     """Return the sample catalog through the application-layer use case."""
 
-    items = [CatalogItemResponse.from_domain(item) for item in await use_case.execute()]
-    return CatalogItemsResponse(items=items)
+    result = await use_case.execute(query.to_domain())
+    return CatalogItemsResponse.from_domain(result)
 
 
 @router.get("/catalog/items/{sku}", tags=["catalog"], response_model=CatalogItemResponse)
