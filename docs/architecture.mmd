@@ -1,0 +1,31 @@
+flowchart TB
+    subgraph service["ddd-fast-api service"]
+        entrypoints["1  Entrypoints<br/><small>HTTP routes and schemas</small>"]
+        application["2  Application<br/><small>Use cases and transactions</small>"]
+        domain["3  Domain<br/><small>Business rules and ports</small>"]
+        infrastructure["4  Infrastructure<br/><small>Repositories and external adapters</small>"]
+    end
+
+    foundation["Foundation<br/><small>Settings, errors, logging, telemetry</small>"]
+    postgres[("PostgreSQL")]
+    identity[("Identity provider")]
+    external[("External services")]
+
+    entrypoints --> application --> domain
+    application -.->|port calls| infrastructure
+    infrastructure -.->|implements ports| domain
+    infrastructure --> postgres
+    infrastructure --> identity
+    infrastructure --> external
+    foundation -.-> entrypoints
+    foundation -.-> application
+    foundation -.-> infrastructure
+
+    classDef layer fill:#eaf2ff,stroke:#2f6fed,color:#17305f,stroke-width:2px;
+    classDef domainLayer fill:#e8f7ef,stroke:#159957,color:#10452a,stroke-width:3px;
+    classDef foundationLayer fill:#f3efff,stroke:#7950c7,color:#392565,stroke-width:2px;
+    classDef external fill:#fff4e6,stroke:#e67700,color:#6b3500,stroke-width:2px;
+    class entrypoints,application,infrastructure layer;
+    class domain domainLayer;
+    class foundation foundationLayer;
+    class postgres,identity,external external;
