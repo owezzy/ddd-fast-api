@@ -110,32 +110,26 @@ The composition root is the only place that knows every concrete adapter.
 Domain modules are mirrored across layers so a feature remains traceable from
 HTTP input to business behavior and storage.
 
-The planned repository shape is:
+The current repository shape is:
 
 ```text
 ddd-fast-api/
-├── src/ddd_fast_api/
-│   ├── entrypoints/
-│   ├── application/
-│   ├── domain/
-│   ├── infrastructure/
-│   ├── foundation/
-│   └── bootstrap.py
+├── .github/workflows/       # Quality, security, and delivery checks
+├── .husky/                  # Local commit hooks
+├── alembic/                 # Database migrations
+├── docs/                    # ADRs, architecture, diagrams, and validation
+├── src/ddd_fast_api/        # Entrypoints, application, domain, adapters
 ├── tests/
 │   ├── unit/
 │   ├── integration/
-│   ├── contract/
 │   └── architecture/
-├── migrations/
-├── deploy/
-│   ├── compose/
-│   └── kubernetes/
-├── docs/
+├── zarf/                    # Compose, Helm, Kustomize, and Kind assets
+├── main.py                  # Compatibility application entrypoint
+├── package.json              # Husky setup
 ├── pyproject.toml
+├── uv.lock
 └── Makefile
 ```
-
-This tree describes the target, not the repository's current contents.
 
 ## Pydantic's role
 
