@@ -118,7 +118,15 @@ ddd-fast-api/
 ├── .husky/                  # Local commit hooks
 ├── alembic/                 # Database migrations
 ├── docs/                    # ADRs, architecture, diagrams, and validation
-├── src/ddd_fast_api/        # Entrypoints, application, domain, adapters
+├── src/ddd_fast_api/
+│   ├── entrypoints/http/     # FastAPI routes, schemas, dependencies, telemetry
+│   ├── application/          # Catalog and identity use cases
+│   ├── domain/               # Catalog and identity entities, rules, and ports
+│   ├── infrastructure/
+│   │   ├── persistence/      # SQLAlchemy models, mappers, repositories, UoW
+│   │   └── http_client.py    # Timeout and bounded-retry HTTP adapter
+│   ├── foundation/           # Settings, errors, logging, auth, telemetry
+│   └── bootstrap.py           # Composition root and application lifecycle
 ├── tests/
 │   ├── unit/
 │   ├── integration/
