@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ddd-fast-api-postgres-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ddd-fast-api-postgres
+spec:
+  serviceName: ddd-fast-api-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ddd-fast-api-postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ddd-fast-api-postgres
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: postgres
+          image: postgres:18.4-alpine
+          envFrom:
+            - secretRef:
+                name: ddd-fast-api-postgres
+          env:
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: trust
+          ports:
+            - name: postgres
+              containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/18/docker
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -h
+                - localhost
+                - -U
+                - postgres
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -h
+                - localhost
+                - -U
+                - postgres
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ddd-fast-api-postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ddd-fast-api-postgres
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: ddd-fast-api-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

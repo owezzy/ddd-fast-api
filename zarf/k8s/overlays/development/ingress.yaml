@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ddd-fast-api
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ddd-fast-api.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ddd-fast-api
+                port:
+                  name: http

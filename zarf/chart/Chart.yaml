@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ddd-fast-api
+description: Production deployment chart for the DDD FastAPI service
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
