@@ -1,6 +1,6 @@
 [project]
 name = "ddd-fast-api"
-version = "0.1.0"
+version = "0.0.1"
 requires-python = ">=3.12"
 description = "A pragmatic DDD FastAPI service template inspired by Ardan Labs Service."
 readme = "README.md"
@@ -13,6 +13,7 @@ dependencies = [
   "asyncpg>=0.30,<1.0",
   "fastapi>=0.115,<1.0",
   "greenlet>=3.1,<4.0",
+  "httpx>=0.27,<1.0",
   "mypy>=1.20.2",
   "pydantic-settings>=2.3,<3.0",
   "sqlalchemy>=2.0.36,<3.0",
@@ -32,9 +33,9 @@ build-backend = "hatchling.build"
 dev = [
   "aiosqlite>=0.20,<1.0",
   "commitizen>=4.16.5",
-  "httpx>=0.27,<1.0",
   "mypy>=1.11,<2.0",
-  "pytest>=8.3,<9.0",
+  "pip-audit>=2.7,<3.0",
+  "pytest>=9.0.3,<10.0",
   "ruff>=0.6,<1.0",
 ]
 
