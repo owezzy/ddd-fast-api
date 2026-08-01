@@ -5,17 +5,17 @@ All notable changes to this project should be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project intends to follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## v0.0.1 (2026-08-01)
 
-### Added
+### Feat
 
-- Initial FastAPI DDD scaffold with catalog and identity sample slices.
-- SQLAlchemy async and Alembic persistence scaffolding.
-- Husky pre-commit and commit-msg hooks.
-- Commitizen conventional commit workflow.
-- Expanded architecture tests for domain, application, and foundation layers.
+- add resilient outbound HTTP adapter
+- add HTTP runtime routes and telemetry
+- add HTTP runtime schemas and dependencies
+- add application lifecycle bootstrap
+- add foundation runtime adapters
+- expand catalog querying and template docs
 
-### Changed
+### Fix
 
-- README now documents local hook setup and current implementation status more
-  precisely.
+- **lint**: files

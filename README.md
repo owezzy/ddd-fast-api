@@ -17,10 +17,10 @@ models, operational completeness, and domain-oriented design into idiomatic
 Python. It is intended to be a starting point, not another framework layered on
 top of FastAPI.
 
-> **Project status:** early scaffold. The architecture and delivery roadmap are
-> defined, but the FastAPI service and production capabilities are not yet
-> implemented. Roadmap items below are deliberately unchecked unless they exist
-> in the repository.
+> **Project status:** early scaffold with a working runtime and operations
+> baseline. The reference business domain and template-generation experience
+> are still in progress; roadmap items are checked only when the corresponding
+> repository artifacts and validation exist.
 
 ## Contents
 
@@ -31,6 +31,7 @@ top of FastAPI.
 - [Planned capabilities](#planned-capabilities)
 - [Repository status](#repository-status)
 - [Getting started](#getting-started)
+- [Validation](#validation)
 - [Delivery roadmap](#delivery-roadmap)
 - [Domain scaffolding contract](docs/scaffolding.md)
 - [Contributing](#contributing)
@@ -74,50 +75,69 @@ management, RBAC, and a replaceable external OIDC adapter.
 
 ## Target architecture
 
-The project uses five memorable code layers:
+The architecture is easiest to read as four focused views rather than one dense
+diagram:
 
-```text
-Entrypoints       FastAPI routes, schemas, CLI, startup and shutdown
-      │
-Application       Use cases, orchestration, authorization, transactions
-      │
-Domain            Entities, value objects, rules, errors, events and ports
-      ▲
-Infrastructure    PostgreSQL, authentication and external-service adapters
+### System context
 
-Foundation        Small domain-independent logging, telemetry and utility code
-```
+![System context showing the client, API, database, identity provider, and external services](docs/architecture-context.svg)
+
+See the editable source at
+[`docs/architecture-context.mmd`](docs/architecture-context.mmd).
+
+### Container architecture
+
+![Container architecture showing the five service layers and their dependencies](docs/architecture.svg)
+
+See the editable source at
+[`docs/architecture.mmd`](docs/architecture.mmd).
+
+### Request lifecycle
+
+![Request lifecycle sequence from HTTP entrypoint through application, domain, and persistence](docs/request-lifecycle.svg)
+
+See the editable source at
+[`docs/request-lifecycle.mmd`](docs/request-lifecycle.mmd).
+
+### Deployment flow
+
+![Deployment flow showing validation, image build, migration, and rollout](docs/deployment-flow.svg)
+
+See the editable source at
+[`docs/deployment-flow.mmd`](docs/deployment-flow.mmd).
 
 The composition root is the only place that knows every concrete adapter.
 Domain modules are mirrored across layers so a feature remains traceable from
 HTTP input to business behavior and storage.
 
-The planned repository shape is:
+The current repository shape is:
 
 ```text
 ddd-fast-api/
+├── .github/workflows/       # Quality, security, and delivery checks
+├── .husky/                  # Local commit hooks
+├── alembic/                 # Database migrations
+├── docs/                    # ADRs, architecture, diagrams, and validation
 ├── src/ddd_fast_api/
-│   ├── entrypoints/
-│   ├── application/
-│   ├── domain/
+│   ├── entrypoints/http/     # FastAPI routes, schemas, dependencies, telemetry
+│   ├── application/          # Catalog and identity use cases
+│   ├── domain/               # Catalog and identity entities, rules, and ports
 │   ├── infrastructure/
-│   ├── foundation/
-│   └── bootstrap.py
+│   │   ├── persistence/      # SQLAlchemy models, mappers, repositories, UoW
+│   │   └── http_client.py    # Timeout and bounded-retry HTTP adapter
+│   ├── foundation/           # Settings, errors, logging, auth, telemetry
+│   └── bootstrap.py           # Composition root and application lifecycle
 ├── tests/
 │   ├── unit/
 │   ├── integration/
-│   ├── contract/
 │   └── architecture/
-├── migrations/
-├── deploy/
-│   ├── compose/
-│   └── kubernetes/
-├── docs/
+├── zarf/                    # Compose, Helm, Kustomize, and Kind assets
+├── main.py                  # Compatibility application entrypoint
+├── package.json              # Husky setup
 ├── pyproject.toml
+├── uv.lock
 └── Makefile
 ```
-
-This tree describes the target, not the repository's current contents.
 
 ## Pydantic's role
 
@@ -148,7 +168,8 @@ by Ardan Labs Service:
   tests;
 - locked dependencies with an optional wheelhouse for offline builds;
 - multi-stage Docker images and Docker Compose for local development;
-- Kustomize-based Kubernetes environments and a separate migration Job;
+- Helm/Kustomize-based Kubernetes environments, a local Kind registry workflow, and a
+  separate migration Job;
 - GitHub Actions as the default CI/CD implementation, with CircleCI documented
   as an alternative;
 - OpenAPI, MkDocs, and source-reference documentation;
@@ -193,6 +214,9 @@ Currently present:
 - expanded architecture tests that guard domain, application, and foundation
   layer boundaries;
 - a minimal FastAPI app factory with `/` and `/health` routes;
+- replaceable bearer authentication and permission dependency examples;
+- liveness, readiness, startup, request telemetry, and Prometheus metrics routes;
+- a shared timeout- and bounded-retry outbound HTTP adapter;
 - an initial unit test covering the scaffold entrypoints;
 - a GitHub Actions quality workflow definition for tests, Ruff, and mypy;
 - optional Husky git hooks for commit-time formatting, linting, and conventional
@@ -205,15 +229,13 @@ Currently present:
 Not yet present:
 
 - business-domain implementation beyond the scaffold metadata endpoints;
-- containers, Kubernetes manifests, or deployment workflows;
 - contract and smoke test layers.
 
 ## Getting started
 
-The repository now contains a minimal executable foundation slice. It is not a
-production service yet, but you can install the baseline dependencies, prepare
-the initial environment file, run the app, and inspect the package layout that
-future work will build on:
+The repository contains an executable foundation and production-runtime
+baseline. You can install the dependencies, prepare the environment file, run
+the app, and inspect the package layout that future domain work will build on:
 
 ```bash
 git clone https://github.com/owezzy/ddd-fast-api.git
@@ -261,7 +283,8 @@ make hooks
 make commit
 ```
 
-- `make hooks` installs the local Husky git hooks from `package.json`.
+- `make hooks` installs the local Husky git hooks from `package.json` and
+  configures Git to use the Commitizen dialog for manual `git commit` commands.
 - The `pre-commit` hook runs `make format` and `make lint` before each commit.
 - The `commit-msg` hook validates messages with Commitizen's conventional
   commit rules.
@@ -278,6 +301,9 @@ Read these sections next:
    snapshot.
 5. [Delivery roadmap](#delivery-roadmap) for the planned build sequence.
 
+Runtime capability details are documented in
+[`docs/production-runtime.md`](docs/production-runtime.md).
+
 Development requirements for the current scaffold are:
 
 - Git
@@ -289,13 +315,21 @@ Optional local commit-hook workflow requirements:
 - Node.js
 - npm
 
-Python 3.12, 3.13, and 3.14 will be tested once CI is introduced. Docker,
-Docker Compose, Kind, kubectl, and Kustomize become requirements in the
-operations phase.
+CI tests Python 3.12, 3.13, and 3.14. Docker, Docker Compose, Kind, kubectl,
+Helm, and Kustomize are requirements for the operations workflows.
 
 The root `main.py` is now a compatibility bootstrap that starts the packaged
 application. It exists to keep the first runnable command simple while the
 project transitions fully into the `src/ddd_fast_api` layout.
+
+## Validation
+
+The end-to-end validation path is documented in
+[`docs/validation.md`](docs/validation.md). It covers fresh-clone quality
+checks, live application smoke checks, Compose database startup, and Helm and
+Kustomize rendering. The CI delivery job runs configuration and packaging
+checks automatically; Docker, Kind, and live HTTP checks are run locally when
+those tools are available.
 
 ## Delivery roadmap
 
@@ -306,14 +340,15 @@ project transitions fully into the `src/ddd_fast_api` layout.
       dependency rules, quality tools, and architecture tests.
 - [ ] **Reference slice:** inventory/catalog contract, domain behavior,
       PostgreSQL adapter, migrations, and tests.
-- [ ] **Production runtime:** account management, authentication,
+- [x] **Production runtime:** account management, authentication,
       authorization, telemetry, health checks, and resilient HTTP clients.
-- [ ] **Operations:** Docker, Compose, migration jobs, Kubernetes, CI/CD, and
-      security scanning.
+- [x] **Operations:** Docker, Compose, migration jobs, Helm/Kustomize Kubernetes
+      packaging, CI/CD, and security scanning.
 - [ ] **Template experience:** project generation, domain scaffolding,
       documentation, examples, and releases.
-- [ ] **Validation:** generate a fresh service, run every workflow, deploy to
-      local and Kubernetes environments, and complete a newcomer review.
+- [x] **Validation:** validate a fresh clone, run the documented workflows,
+      deploy to local and Kubernetes environments, and complete a newcomer
+      review.
 
 ## Contributing
 

@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant E as Entrypoint
+    participant A as Application
+    participant D as Domain
+    participant R as Repository
+    participant DB as PostgreSQL
+
+    C->>E: GET /catalog/items
+    E->>E: Validate query and auth
+    E->>A: List items(filter, page)
+    A->>D: Apply filtering and ordering rules
+    A->>R: Read matching items
+    R->>DB: SELECT items
+    DB-->>R: Rows
+    R-->>A: Domain entities
+    A-->>E: Result page
+    E-->>C: 200 JSON response
+
+    Note over E,DB: Errors are mapped at the HTTP boundary.

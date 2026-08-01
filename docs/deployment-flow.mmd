@@ -1,0 +1,19 @@
+flowchart TB
+    start([Change pushed]) --> quality["Quality checks<br/><small>pytest, Ruff, mypy</small>"]
+    quality --> package["Package checks<br/><small>Compose, Helm, Kustomize</small>"]
+    package --> image["Build image"]
+    image --> migrate["Run migration job"]
+    migrate --> rollout["Roll out API"]
+    rollout --> smoke["Smoke check<br/><small>/health/ready</small>"]
+    smoke --> done([Ready])
+
+    quality -.->|failure| stop([Stop and fix])
+    package -.->|failure| stop
+    smoke -.->|failure| stop
+
+    classDef action fill:#eaf2ff,stroke:#2f6fed,color:#17305f,stroke-width:2px;
+    classDef gate fill:#e8f7ef,stroke:#159957,color:#10452a,stroke-width:2px;
+    classDef stop fill:#fff0f0,stroke:#d63939,color:#6b1d1d,stroke-width:2px;
+    class quality,package,image,migrate,rollout action;
+    class smoke,done gate;
+    class stop stop;
