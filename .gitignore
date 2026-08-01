@@ -24,6 +24,7 @@ htmlcov/
 *.pem
 *.key
 
+
 # IDE and operating system
 .idea/
 .vscode/
@@ -37,3 +38,7 @@ node_modules/
 .dolt/
 *.db
 .beads-credential-key
+
+# opencode
+.omo/
+
