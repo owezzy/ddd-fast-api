@@ -1,0 +1,63 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/owezzy/ddd-fast-api
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+containerPort: 8000
+terminationGracePeriodSeconds: 30
+
+strategy:
+  type: RollingUpdate
+
+config:
+  appName: ddd-fast-api
+  appEnv: production
+  appDebug: "false"
+  appLogLevel: INFO
+  catalogRepositoryBackend: sqlalchemy
+  identityRepositoryBackend: sqlalchemy
+  authAudience: ddd-fast-api
+  authTokenTtlSeconds: "900"
+  telemetryEnabled: "true"
+  outboundTimeoutSeconds: "5"
+  outboundMaxRetries: "2"
+
+secrets:
+  name: ddd-fast-api-secrets
+  databaseUrlKey: DDD_FAST_API_DATABASE_URL
+  authSecretKey: DDD_FAST_API_AUTH_SECRET
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  startup:
+    failureThreshold: 30
+    periodSeconds: 2
+  liveness:
+    periodSeconds: 10
+  readiness:
+    periodSeconds: 5
+
+migration:
+  enabled: true
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+ingress:
+  enabled: false
+  className: ""
+  hosts: []
