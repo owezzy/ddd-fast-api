@@ -11,8 +11,8 @@ resources:
 secretGenerator:
   - name: ddd-fast-api-secrets
     literals:
-      - DDD_FAST_API_DATABASE_URL=postgresql+asyncpg://postgres:postgres@ddd-fast-api-postgres:5432/ddd_fast_api
-      - DDD_FAST_API_AUTH_SECRET=local-development-secret-change-me
+      - DDD_FAST_API_DATABASE_URL=postgresql+asyncpg://postgres@ddd-fast-api-postgres:5432/ddd_fast_api
+      - DDD_FAST_API_AUTH_SECRET=__LOCAL_DEVELOPMENT_AUTH_SECRET__
 
 generatorOptions:
   disableNameSuffixHash: true
