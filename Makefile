@@ -74,6 +74,7 @@ type-check:
 
 hooks:
 	npm install
+	git config core.editor "uv run cz commit --dry-run --write-message-to-file"
 
 commit:
 	uv run cz commit

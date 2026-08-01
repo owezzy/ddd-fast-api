@@ -264,7 +264,8 @@ make hooks
 make commit
 ```
 
-- `make hooks` installs the local Husky git hooks from `package.json`.
+- `make hooks` installs the local Husky git hooks from `package.json` and
+  configures Git to use the Commitizen dialog for manual `git commit` commands.
 - The `pre-commit` hook runs `make format` and `make lint` before each commit.
 - The `commit-msg` hook validates messages with Commitizen's conventional
   commit rules.
