@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ddd-fast-api-migration
+  annotations:
+    ops.ddd-fast-api.dev/migration: "run-before-deployment"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ddd-fast-api-migration
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migration
+          image: ghcr.io/owezzy/ddd-fast-api:0.1.0
+          imagePullPolicy: IfNotPresent
+          command: [alembic, upgrade, head]
+          envFrom:
+            - configMapRef:
+                name: ddd-fast-api
+          env:
+            - name: DDD_FAST_API_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ddd-fast-api-secrets
+                  key: DDD_FAST_API_DATABASE_URL
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

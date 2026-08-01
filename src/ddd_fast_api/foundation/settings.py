@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ddd_fast_api"
     catalog_repository_backend: Literal["memory", "sqlalchemy"] = "memory"
     identity_repository_backend: Literal["memory", "sqlalchemy"] = "memory"
+    auth_secret: str = "local-development-secret-change-me"
+    auth_audience: str = "ddd-fast-api"
+    auth_token_ttl_seconds: int = 900
+    telemetry_enabled: bool = True
+    outbound_timeout_seconds: float = 5.0
+    outbound_max_retries: int = 2
 
 
 @lru_cache(maxsize=1)
