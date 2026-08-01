@@ -37,3 +37,65 @@ jobs:
 
       - name: Run mypy
         run: uv run mypy src
+
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Sync dependencies
+        run: uv sync --group dev
+
+      - name: Audit Python dependencies
+        run: uv run pip-audit
+
+      - name: Scan repository with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret
+          ignore-unfixed: true
+
+  delivery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Validate Compose configuration
+        run: docker compose -f zarf/compose/docker-compose.yml config
+
+      - name: Build production image
+        run: docker build -f zarf/Dockerfile -t ddd-fast-api:ci .
+
+      - name: Validate Helm chart
+        run: |
+          helm lint zarf/chart
+          helm template ddd-fast-api zarf/chart --namespace ddd-fast-api >/tmp/ddd-fast-api.yaml
+
+      - name: Validate Kustomize overlays
+        run: |
+          kubectl kustomize zarf/k8s/overlays/development >/tmp/ddd-fast-api-development.yaml
+          kubectl kustomize zarf/k8s/overlays/production >/tmp/ddd-fast-api-production.yaml
+          kubectl kustomize zarf/k8s/dev/database >/tmp/ddd-fast-api-database.yaml
