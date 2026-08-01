@@ -7,13 +7,17 @@ import uvicorn
 from fastapi import FastAPI
 
 from ddd_fast_api.entrypoints.http.routes import router
+from ddd_fast_api.entrypoints.http.telemetry import RequestTelemetryMiddleware
 from ddd_fast_api.foundation import (
+    HMACBearerAuthenticator,
     Settings,
+    Telemetry,
     configure_logging,
     get_logger,
     get_settings,
     register_exception_handlers,
 )
+from ddd_fast_api.infrastructure.http_client import ResilientHttpClient
 from ddd_fast_api.infrastructure.persistence import (
     create_engine,
     create_session_factory_from_engine,
@@ -29,9 +33,16 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     settings = application.state.settings
     engine = create_engine(settings)
     session_factory = create_session_factory_from_engine(engine)
+    http_client = ResilientHttpClient(
+        timeout_seconds=settings.outbound_timeout_seconds,
+        max_retries=settings.outbound_max_retries,
+    )
 
     application.state.engine = engine
     application.state.session_factory = session_factory
+    application.state.http_client = http_client
+    application.state.startup_complete = True
+    application.state.ready = True
 
     logger.info(
         "persistence resources initialized",
@@ -41,6 +52,8 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     yield
 
     await engine.dispose()
+    await http_client.close()
+    application.state.ready = False
     logger.info(
         "persistence resources disposed",
         extra={"event": "persistence_resources_disposed"},
@@ -64,6 +77,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     application.state.settings = resolved_settings
+    application.state.telemetry = Telemetry()
+    application.state.authenticator = HMACBearerAuthenticator(
+        secret=resolved_settings.auth_secret,
+        audience=resolved_settings.auth_audience,
+        token_ttl_seconds=resolved_settings.auth_token_ttl_seconds,
+    )
+    application.state.startup_complete = False
+    application.state.ready = False
+    application.add_middleware(RequestTelemetryMiddleware, telemetry=application.state.telemetry)
     register_exception_handlers(application)
     application.include_router(router)
     logger.info(
