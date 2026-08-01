@@ -1,84 +1,78 @@
-# Agent Instructions
+# PROJECT KNOWLEDGE BASE
 
-This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
+**Generated:** 2026-07-20
+**Repository:** ddd-fast-api
+**Status:** Early scaffold — architecture defined, implementation in progress
 
-## Quick Reference
+## OVERVIEW
 
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work atomically
-bd close <id>         # Complete work
-bd dolt push          # Push beads data to remote
+Production-oriented FastAPI service template inspired by Ardan Labs Service. Pragmatic DDD with five-layer architecture: Entrypoints → Application → Domain → Infrastructure → Foundation.
+
+## STRUCTURE
+
+```
+ddd-fast-api/
+├── src/ddd_fast_api/
+│   ├── entrypoints/    # FastAPI routes, schemas, HTTP adapters
+│   ├── application/    # Use cases, orchestration, transaction boundaries
+│   ├── domain/         # Entities, value objects, rules, ports (NO framework imports)
+│   ├── infrastructure/ # PostgreSQL repos, auth adapters, external clients
+│   ├── foundation/     # Logging, errors, settings (domain-independent)
+│   └── bootstrap.py    # Composition root, lifespan, app factory
+├── tests/
+│   ├── unit/           # Domain + application tests (no DB/HTTP)
+│   ├── integration/    # SQLAlchemy/PostgreSQL path tests
+│   └── architecture/   # Import boundary enforcement
+├── alembic/            # Database migrations
+├── docs/               # Architecture plan, ADRs, scaffolding contract
+└── Makefile            # Dev commands (sync, run, test, lint, format, type-check)
 ```
 
-## Non-Interactive Shell Commands
+## WHERE TO LOOK
 
-**ALWAYS use non-interactive flags** with file operations to avoid hanging on confirmation prompts.
+| Task | Location | Notes |
+|------|----------|-------|
+| Add new domain | `domain/<slice>/`, `application/<slice>/` | Mirror across layers |
+| Add HTTP endpoint | `entrypoints/http/routes.py` | Use Depends for use cases |
+| Add persistence adapter | `infrastructure/persistence/repositories/` | Implement domain port |
+| Change settings | `foundation/settings.py` | Pydantic-settings, `DDD_FAST_API_` prefix |
+| Modify error handling | `foundation/errors.py` | ProjectError → HTTP 4xx/5xx |
+| Add migration | `alembic/versions/` | Use `alembic revision --autogenerate` |
+| Architecture tests | `tests/architecture/` | Enforce import boundaries |
 
-Shell commands like `cp`, `mv`, and `rm` may be aliased to include `-i` (interactive) mode on some systems, causing the agent to hang indefinitely waiting for y/n input.
+## CONVENTIONS
 
-**Use these forms instead:**
+- **Dependency direction:** Domain imports nothing; Application imports Domain; Infrastructure implements Domain ports; Entrypoints depend on Application.
+- **Pydantic at boundaries only:** Domain entities are plain dataclasses, not Pydantic models.
+- **Repository pattern:** Repositories never commit; use cases own transaction boundaries via UnitOfWork.
+- **Async everywhere:** SQLAlchemy async, asyncpg, async use cases.
+- **Settings prefix:** All env vars prefixed with `DDD_FAST_API_`.
+- **Adapter seam:** `catalog_repository_backend` and `identity_repository_backend` settings switch between `memory` and `sqlalchemy`.
+
+## ANTI-PATTERNS (THIS PROJECT)
+
+- Domain layer MUST NOT import FastAPI, Pydantic, SQLAlchemy, or infrastructure.
+- Application layer MUST NOT import FastAPI, SQLAlchemy, or infrastructure.
+- Foundation layer MUST NOT import any project business layer.
+- Repositories MUST NOT call commit/rollback directly.
+- Use Pydantic for API schemas, NOT for domain entities.
+
+## COMMANDS
+
 ```bash
-# Force overwrite without prompting
-cp -f source dest           # NOT: cp source dest
-mv -f source dest           # NOT: mv source dest
-rm -f file                  # NOT: rm file
-
-# For recursive operations
-rm -rf directory            # NOT: rm -r directory
-cp -rf source dest          # NOT: cp -r source dest
+make sync           # Install dependencies
+make run            # Start dev server (uvicorn)
+make test           # Run pytest
+make lint           # Ruff check
+make format         # Ruff fix + format
+make type-check     # mypy src
+make hooks          # Install Husky git hooks
+make commit         # Commitizen conventional commit
 ```
 
-**Other commands that may prompt:**
-- `scp` - use `-o BatchMode=yes` for non-interactive
-- `ssh` - use `-o BatchMode=yes` to fail instead of prompting
-- `apt-get` - use `-y` flag
-- `brew` - use `HOMEBREW_NO_AUTO_UPDATE=1` env var
+## NOTES
 
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
-## Beads Issue Tracker
-
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
-
-### Quick Reference
-
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>         # Complete work
-```
-
-### Rules
-
-- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
-- Run `bd prime` for detailed command reference and session close protocol
-- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
-
-## Session Completion
-
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd dolt push
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-<!-- END BEADS INTEGRATION -->
+- `main.py` at root is compatibility bootstrap for `uv run python main.py`.
+- In-memory adapters are default; set `DDD_FAST_API_CATALOG_REPOSITORY_BACKEND=sqlalchemy` for PostgreSQL.
+- Architecture tests enforce layer boundaries via AST analysis of imports.
+- Beads (bd) is used for issue tracking: `bd ready`, `bd show <id>`, `bd close <id>`.
