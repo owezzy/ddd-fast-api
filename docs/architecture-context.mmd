@@ -1,0 +1,19 @@
+flowchart LR
+    client["Client<br/><small>Browser, CLI, or service</small>"]
+
+    api[["ddd-fast-api<br/><small>FastAPI service</small>"]]
+    database[("PostgreSQL<br/><small>Service data</small>")]
+    identity[("Identity provider<br/><small>Optional OIDC</small>")]
+    external[("External services<br/><small>Outbound HTTP</small>")]
+
+    client -->|HTTP / JSON| api
+    api -->|reads and writes| database
+    api -->|authenticates| identity
+    api -->|calls| external
+
+    classDef actor fill:#eaf2ff,stroke:#2f6fed,color:#17305f,stroke-width:2px;
+    classDef system fill:#e8f7ef,stroke:#159957,color:#10452a,stroke-width:3px;
+    classDef external fill:#fff4e6,stroke:#e67700,color:#6b3500,stroke-width:2px;
+    class client actor;
+    class api system;
+    class database,identity,external external;

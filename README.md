@@ -75,50 +75,69 @@ management, RBAC, and a replaceable external OIDC adapter.
 
 ## Target architecture
 
-The project uses five memorable code layers:
+The architecture is easiest to read as four focused views rather than one dense
+diagram:
 
-```text
-Entrypoints       FastAPI routes, schemas, CLI, startup and shutdown
-      │
-Application       Use cases, orchestration, authorization, transactions
-      │
-Domain            Entities, value objects, rules, errors, events and ports
-      ▲
-Infrastructure    PostgreSQL, authentication and external-service adapters
+### System context
 
-Foundation        Small domain-independent logging, telemetry and utility code
-```
+![System context showing the client, API, database, identity provider, and external services](docs/architecture-context.svg)
+
+See the editable source at
+[`docs/architecture-context.mmd`](docs/architecture-context.mmd).
+
+### Container architecture
+
+![Container architecture showing the five service layers and their dependencies](docs/architecture.svg)
+
+See the editable source at
+[`docs/architecture.mmd`](docs/architecture.mmd).
+
+### Request lifecycle
+
+![Request lifecycle sequence from HTTP entrypoint through application, domain, and persistence](docs/request-lifecycle.svg)
+
+See the editable source at
+[`docs/request-lifecycle.mmd`](docs/request-lifecycle.mmd).
+
+### Deployment flow
+
+![Deployment flow showing validation, image build, migration, and rollout](docs/deployment-flow.svg)
+
+See the editable source at
+[`docs/deployment-flow.mmd`](docs/deployment-flow.mmd).
 
 The composition root is the only place that knows every concrete adapter.
 Domain modules are mirrored across layers so a feature remains traceable from
 HTTP input to business behavior and storage.
 
-The planned repository shape is:
+The current repository shape is:
 
 ```text
 ddd-fast-api/
+├── .github/workflows/       # Quality, security, and delivery checks
+├── .husky/                  # Local commit hooks
+├── alembic/                 # Database migrations
+├── docs/                    # ADRs, architecture, diagrams, and validation
 ├── src/ddd_fast_api/
-│   ├── entrypoints/
-│   ├── application/
-│   ├── domain/
+│   ├── entrypoints/http/     # FastAPI routes, schemas, dependencies, telemetry
+│   ├── application/          # Catalog and identity use cases
+│   ├── domain/               # Catalog and identity entities, rules, and ports
 │   ├── infrastructure/
-│   ├── foundation/
-│   └── bootstrap.py
+│   │   ├── persistence/      # SQLAlchemy models, mappers, repositories, UoW
+│   │   └── http_client.py    # Timeout and bounded-retry HTTP adapter
+│   ├── foundation/           # Settings, errors, logging, auth, telemetry
+│   └── bootstrap.py           # Composition root and application lifecycle
 ├── tests/
 │   ├── unit/
 │   ├── integration/
-│   ├── contract/
 │   └── architecture/
-├── migrations/
-├── deploy/
-│   ├── compose/
-│   └── kubernetes/
-├── docs/
+├── zarf/                    # Compose, Helm, Kustomize, and Kind assets
+├── main.py                  # Compatibility application entrypoint
+├── package.json              # Husky setup
 ├── pyproject.toml
+├── uv.lock
 └── Makefile
 ```
-
-This tree describes the target, not the repository's current contents.
 
 ## Pydantic's role
 
