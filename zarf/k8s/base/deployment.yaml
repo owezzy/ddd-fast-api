@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ddd-fast-api
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ddd-fast-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ddd-fast-api
+    spec:
+      terminationGracePeriodSeconds: 30
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ddd-fast-api
+          image: ghcr.io/owezzy/ddd-fast-api:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: ddd-fast-api
+          env:
+            - name: DDD_FAST_API_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ddd-fast-api-secrets
+                  key: DDD_FAST_API_DATABASE_URL
+            - name: DDD_FAST_API_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ddd-fast-api-secrets
+                  key: DDD_FAST_API_AUTH_SECRET
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: http
+            failureThreshold: 30
+            periodSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 5
