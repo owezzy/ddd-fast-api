@@ -1,33 +1,31 @@
-flowchart LR
-    client["Client<br/>Browser, CLI, or service"]
-
-    subgraph service["ddd-fast-api"]
-        entrypoints["Entrypoints<br/><small>FastAPI / Starlette</small><br/>Routes, schemas, dependencies"]
-        application["Application<br/><small>Python</small><br/>Use cases, authorization, transactions"]
-        domain["Domain<br/><small>Plain Python</small><br/>Entities, rules, errors, events, ports"]
-        infrastructure["Infrastructure<br/><small>SQLAlchemy / httpx</small><br/>Repositories and external adapters"]
-        foundation["Foundation<br/><small>Python</small><br/>Logging, telemetry, settings"]
+flowchart TB
+    subgraph service["ddd-fast-api service"]
+        entrypoints["1  Entrypoints<br/><small>HTTP routes and schemas</small>"]
+        application["2  Application<br/><small>Use cases and transactions</small>"]
+        domain["3  Domain<br/><small>Business rules and ports</small>"]
+        infrastructure["4  Infrastructure<br/><small>Repositories and external adapters</small>"]
     end
 
-    postgres[("PostgreSQL<br/>Persistent data")]
-    identity[("Identity Provider<br/>Optional OIDC")]
-    external[("External Services<br/>Outbound HTTP")]
+    foundation["Foundation<br/><small>Settings, errors, logging, telemetry</small>"]
+    postgres[("PostgreSQL")]
+    identity[("Identity provider")]
+    external[("External services")]
 
-    client -->|HTTP / JSON| entrypoints
-    entrypoints -->|invokes| application
-    application -->|applies rules| domain
-    application -->|uses ports| infrastructure
+    entrypoints --> application --> domain
+    application -.->|port calls| infrastructure
     infrastructure -.->|implements ports| domain
-    infrastructure -->|SQL| postgres
-    infrastructure -->|OIDC| identity
-    infrastructure -->|HTTP| external
-    foundation -.->|supports| entrypoints
-    foundation -.->|supports| application
-    foundation -.->|supports| infrastructure
+    infrastructure --> postgres
+    infrastructure --> identity
+    infrastructure --> external
+    foundation -.-> entrypoints
+    foundation -.-> application
+    foundation -.-> infrastructure
 
-    classDef layer fill:#eff6ff,stroke:#2563eb,color:#172554,stroke-width:2px;
-    classDef domainLayer fill:#ecfdf5,stroke:#059669,color:#064e3b,stroke-width:3px;
-    classDef external fill:#fff7ed,stroke:#ea580c,color:#7c2d12,stroke-width:2px;
-    class entrypoints,application,infrastructure,foundation layer;
+    classDef layer fill:#eaf2ff,stroke:#2f6fed,color:#17305f,stroke-width:2px;
+    classDef domainLayer fill:#e8f7ef,stroke:#159957,color:#10452a,stroke-width:3px;
+    classDef foundationLayer fill:#f3efff,stroke:#7950c7,color:#392565,stroke-width:2px;
+    classDef external fill:#fff4e6,stroke:#e67700,color:#6b3500,stroke-width:2px;
+    class entrypoints,application,infrastructure layer;
     class domain domainLayer;
-    class client,postgres,identity,external external;
+    class foundation foundationLayer;
+    class postgres,identity,external external;

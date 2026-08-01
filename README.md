@@ -75,15 +75,36 @@ management, RBAC, and a replaceable external OIDC adapter.
 
 ## Target architecture
 
-The project uses five memorable code layers. The C4-style container view below
-shows how requests move through the service and where infrastructure adapters
-plug into the domain boundary.
+The architecture is easiest to read as four focused views rather than one dense
+diagram:
 
-![C4-style target architecture showing the HTTP entrypoint, application,
-domain, infrastructure, and foundation layers](docs/architecture.svg)
+### System context
 
-The editable Mermaid source is available at
+![System context showing the client, API, database, identity provider, and external services](docs/architecture-context.svg)
+
+See the editable source at
+[`docs/architecture-context.mmd`](docs/architecture-context.mmd).
+
+### Container architecture
+
+![Container architecture showing the five service layers and their dependencies](docs/architecture.svg)
+
+See the editable source at
 [`docs/architecture.mmd`](docs/architecture.mmd).
+
+### Request lifecycle
+
+![Request lifecycle sequence from HTTP entrypoint through application, domain, and persistence](docs/request-lifecycle.svg)
+
+See the editable source at
+[`docs/request-lifecycle.mmd`](docs/request-lifecycle.mmd).
+
+### Deployment flow
+
+![Deployment flow showing validation, image build, migration, and rollout](docs/deployment-flow.svg)
+
+See the editable source at
+[`docs/deployment-flow.mmd`](docs/deployment-flow.mmd).
 
 The composition root is the only place that knows every concrete adapter.
 Domain modules are mirrored across layers so a feature remains traceable from
