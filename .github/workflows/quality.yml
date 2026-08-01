@@ -85,9 +85,6 @@ jobs:
 
       - name: Validate Compose configuration
         run: docker compose -f zarf/compose/docker-compose.yml config
-        env:
-          POSTGRES_PASSWORD: ci-compose-password
-          DDD_FAST_API_AUTH_SECRET: ci-compose-auth-secret
 
       - name: Build production image
         run: docker build -f zarf/Dockerfile -t ddd-fast-api:ci .

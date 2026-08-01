@@ -25,9 +25,12 @@ def test_hmac_authenticator_round_trips_principal_claims() -> None:
 def test_hmac_authenticator_rejects_tampered_token() -> None:
     authenticator = HMACBearerAuthenticator(secret="a" * 32, audience="test")
     token = authenticator.issue_token("user-1")
+    signature_start = token.rfind(".") + 1
+    replacement = "A" if token[signature_start] != "A" else "B"
+    tampered_token = token[:signature_start] + replacement + token[signature_start + 1 :]
 
     with pytest.raises(ProjectError) as error:
-        authenticator.authenticate(f"Bearer {token[:-1]}x")
+        authenticator.authenticate(f"Bearer {tampered_token}")
 
     assert getattr(error.value, "code") == "invalid_bearer_token"
 
