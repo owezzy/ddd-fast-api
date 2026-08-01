@@ -1,0 +1,25 @@
+replicaCount: 1
+image:
+  repository: localhost:5001/ddd-fast-api
+  tag: dev
+config:
+  appEnv: development
+  catalogRepositoryBackend: memory
+  identityRepositoryBackend: memory
+podDisruptionBudget:
+  enabled: false
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: ddd-fast-api.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ddd-fast-api
+                port:
+                  name: http
